@@ -30,14 +30,6 @@ class DatabaseHelper {
     return db.query(table);
   }
 
-  static Future<void> update(String table, Map<String, dynamic> data) async {
-    print('barcode ${data['barcode']}');
-
-    final db = await database();
-    await db.update(table, data, where: 'id = ?', whereArgs: [data['id']]);
-    print('barcode ${data['barcode']}');
-  }
-
   static Future<void> delete(String table, int id) async {
     final db = await database();
     await db.delete(table, where: 'id = ?', whereArgs: [id]);

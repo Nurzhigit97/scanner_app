@@ -27,15 +27,6 @@ class ProductCubit extends Cubit<ProductState> {
     await loadProducts();
   }
 
-  Future<void> updateProduct(Product product) async {
-    await DatabaseHelper.update('products', {
-      'barcode': product.barcode,
-      'productName': product.productName,
-      'createdAt': product.createdAt,
-    });
-    await loadProducts();
-  }
-
   Future<void> deleteProduct(int id) async {
     await DatabaseHelper.delete('products', id);
     await loadProducts();
