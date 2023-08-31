@@ -1,55 +1,142 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:scanner_app/features/pages/widgets/detail_page.dart';
-import 'package:scanner_app/shared/data/repos/product_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:scanner_app/features/cubits/product_cubit.dart';
+import 'package:scanner_app/features/cubits/product_state.dart';
+import 'package:scanner_app/shared/data/models/productModel.dart';
+import 'package:scanner_app/shared/extenstions/on_context.dart';
+import 'package:scanner_app/shared/widgets/app_error_text.dart';
 import 'package:scanner_app/shared/widgets/appbar_widget.dart';
+import 'package:scanner_app/shared/widgets/detail_page.dart';
+import 'package:scanner_app/shared/widgets/progress_indicator_widget.dart';
 
 class HistoryScanPage extends StatelessWidget {
   const HistoryScanPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final products = Provider.of<ProductProvider>(context).products;
+    final productCubit = context.read<ProductCubit>();
 
     return Scaffold(
       appBar: appBarWidget("History Page"),
-      body: ListView.builder(
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return ListTile(
-            title: Text(product.name),
-            subtitle: Text(product.barcode),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () {
-                Provider.of<ProductProvider>(context, listen: false)
-                    .removeProduct(product);
-              },
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailPage(
-                    barcode: product.barcode,
-                    nameProduct: product.name,
+      body: BlocBuilder<ProductCubit, ProductState>(
+        builder: (context, state) {
+          if (state is ProductError) AppErrorText(message: state.message);
+
+          if (state is ProductLoaded) {
+            return ListView.builder(
+              itemCount: state.products.length,
+              itemBuilder: (context, index) {
+                final product = state.products[index];
+                print('ProductNameListView ${product.productName}');
+                return ListTile(
+                  title: Text(product.productName),
+                  subtitle: Text(product.barcode),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                          final updatedProduct = await showDialog(
+                            context: context,
+                            builder: (context) =>
+                                EditProductDialog(product: product),
+                          );
+
+                          if (updatedProduct != null) {
+                            productCubit.updateProduct(updatedProduct);
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async =>
+                            await productCubit.deleteProduct(product.id ?? 2),
+                      ),
+                    ],
                   ),
-                ),
-              );
-            },
-          );
+                  onTap: () {
+                    context.push(DetailPage(
+                      barcode: product.barcode,
+                      nameProduct: product.productName,
+                      createdAt: product.createdAt,
+                    ));
+                  },
+                );
+              },
+            );
+          }
+          return const ProgressIndicatorWidget();
         },
       ),
       floatingActionButton: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
         onPressed: () {
-          Provider.of<ProductProvider>(context, listen: false)
-              .removeAllProducts();
+          productCubit.deleteProductAllProduct();
         },
         label: const Text("Remove all"),
         icon: const Icon(Icons.delete_forever),
       ),
+    );
+  }
+}
+
+class EditProductDialog extends StatefulWidget {
+  final Product product;
+
+  const EditProductDialog({super.key, required this.product});
+
+  @override
+  _EditProductDialogState createState() => _EditProductDialogState();
+}
+
+class _EditProductDialogState extends State<EditProductDialog> {
+  late TextEditingController barcodeController;
+  late TextEditingController productNameController;
+
+  @override
+  void initState() {
+    super.initState();
+    barcodeController = TextEditingController(text: widget.product.barcode);
+    productNameController =
+        TextEditingController(text: widget.product.productName);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final productCubit = context.watch<ProductCubit>();
+    return AlertDialog(
+      title: const Text('Edit Product'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: productNameController,
+            decoration: const InputDecoration(labelText: 'Name product'),
+          ),
+          TextField(
+            controller: barcodeController,
+            decoration: const InputDecoration(labelText: 'Barcode'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final updatedProduct = widget.product.copyWith(
+              barcode: barcodeController.text,
+              productName: productNameController.text,
+            );
+            await productCubit.updateProduct(updatedProduct);
+            context.pop();
+          },
+          child: const Text('Update'),
+        ),
+      ],
     );
   }
 }

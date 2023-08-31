@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scanner_app/features/pages/barcode_scan_page/barcode_scan_result_page.dart';
+import 'package:scanner_app/shared/extenstions/on_context.dart';
 import 'package:scanner_app/shared/widgets/appbar_widget.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
@@ -24,12 +25,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
 
             if (barcode.isNotEmpty) {
               // ignore: use_build_context_synchronously
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ScanResultPage(barcode: barcode),
-                ),
-              );
+              context.push(ScanResultPage(barcode: barcode));
             }
           },
           icon: const Icon(

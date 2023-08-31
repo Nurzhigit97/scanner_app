@@ -1,9 +1,8 @@
-// ignore: must_be_immutable
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:provider/provider.dart';
-import 'package:scanner_app/shared/data/models/product.dart';
-import 'package:scanner_app/shared/data/repos/product_provider.dart';
+import 'package:scanner_app/shared/data/models/productModel.dart';
+import 'package:scanner_app/features/cubits/product_cubit.dart';
 
 // ignore: must_be_immutable
 class ScanResultPage extends StatefulWidget {
@@ -17,17 +16,17 @@ class ScanResultPage extends StatefulWidget {
 }
 
 class _ScanResultPageState extends State<ScanResultPage> {
-  late TextEditingController _nameController;
+  late TextEditingController _productNameController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
+    _productNameController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _productNameController.dispose();
     super.dispose();
   }
 
@@ -40,7 +39,7 @@ class _ScanResultPageState extends State<ScanResultPage> {
         child: Column(
           children: [
             TextField(
-              controller: _nameController,
+              controller: _productNameController,
               autofocus: true,
               decoration: const InputDecoration(labelText: 'Product Name'),
             ),
@@ -54,7 +53,7 @@ class _ScanResultPageState extends State<ScanResultPage> {
                     '#FF0000', 'Cancel', true, ScanMode.BARCODE);
 
                 if (updatedBarcode.isNotEmpty) {
-                  _nameController.text = ''; // Clear the name field
+                  _productNameController.text = ''; // Clear the name field
                   setState(() {
                     widget.barcode = updatedBarcode;
                   });
@@ -67,13 +66,12 @@ class _ScanResultPageState extends State<ScanResultPage> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    if (_nameController.text.isNotEmpty) {
-                      Provider.of<ProductProvider>(context, listen: false)
-                          .addProduct(
-                        Product(
-                            name: _nameController.text,
-                            barcode: widget.barcode),
-                      );
+                    if (_productNameController.text.isNotEmpty) {
+                      context.read<ProductCubit>().addProduct(Product(
+                            barcode: widget.barcode,
+                            productName: _productNameController.text,
+                            createdAt: DateTime.now().toString(),
+                          ));
                       Navigator.pop(context);
                     }
                   },
