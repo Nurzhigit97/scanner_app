@@ -1,16 +1,9 @@
 # scanner_app
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<div >
+  <div style="display: flex;  ">
+    <img width="300" src="https://github.com/Nurzhigit97/scanner_app/assets/106031957/db94336b-c22b-4826-98de-da876678b270"/>
+    <img width="300" src="https://github.com/Nurzhigit97/scanner_app/assets/106031957/7d6d9d9b-d2da-471d-8837-eaac1fa14ebc"/>
+    <img  width="300" src="https://github.com/Nurzhigit97/scanner_app/assets/106031957/5349b1fa-fee9-47ea-b40a-9d5acc6b3030"/>
+  </div>
+</div>
